@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request: 
+    branches:
+      - main 
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  BUILD_DATE: $(date +'%d%m%Y')
+  DOTNET_VERSION: '9.x'
+
+jobs:
+
+  deploy:
+    name: Deploy Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to vps using Ansible
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/task_service/deploy/
+            ansible-playbook -i inventory deploy_microservices.yml
